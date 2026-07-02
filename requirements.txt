@@ -1,4 +1,8 @@
 pandas
+numpy
 openpyxl
+matplotlib
+jupyter
+ipykernel
 python-dotenv
 openai
