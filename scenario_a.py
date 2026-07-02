@@ -1,10 +1,3 @@
-"""Scenario A — API-based annotation (OpenAI).
-
-This file contributes nothing but a backend adapter and a CLI. All annotation
-logic is shared with Scenario B in codemix_task.annotators, so the two scenarios
-differ only in how a (system, user) prompt pair reaches a model.
-"""
-
 import argparse
 import os
 

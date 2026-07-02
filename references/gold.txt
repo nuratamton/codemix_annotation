@@ -1,0 +1,89 @@
+# GOLD ANNOTATION SAMPLE — template: hand done
+
+# TURN 1  — form/function split (mock threat, no profanity)
+TEXT = "U btr b"
+# aggressive-looking but no profanity/target -> tests Axis1=neither, Axis2=mock
+LANGID  = >>> [("U","EN"), ("btr","EN"), ("b","EN")]
+AXIS1   = >>> neither
+AXIS2   = >>> mock_aggression
+TARGET  = >>> addressee
+MECH    = >>> direct
+CONF    = >>> certain
+WHY     = >>> mock-threat present but no profanity or protected target
+
+# =====================================================================
+# TURN 2  — profanity but NOT interpersonal (the key form≠function case)
+TEXT = "but i heard they taste like shit"
+LANGID  = >>> [("but","EN"), ("i", "EN"),("heard","EN"), ("they","EN"), ("taste","EN"), ("like","EN"), ("shit","EN"),]
+AXIS1   = >>> offensive
+AXIS2   = >>> none
+TARGET  = >>> third_party
+MECH    = >>> 
+CONF    = >>> certain
+WHY     = >>> profanity present → Axis1 offensive; but directed at food, not a person
+
+# =====================================================================
+# TURN 3  — Singlish particle density ("looks like chaos, resolves clean")
+TEXT = "Aiya I paiseh sia"
+LANGID  = >>> [("Aiya","SG"), ("I", "EN"), ("paiseh", "SG"), ("sia", "SG")]
+AXIS1   = >>> neither
+AXIS2   = >>> none
+TARGET  = >>> self
+MECH    = >>>
+CONF    = >>> certain
+WHY     = >>> no harm, no aggression
+
+# =====================================================================
+# TURN 4  — informal English + "pissed" (self-state, not an attack)
+TEXT = "i tried it bef but i j ended up being pissed while running"
+LANGID  = >>> [("i","EN"), ("tried", "EN"), ("bef", "EN"), ("but", "EN"), ("i", "EN"), ("j", "EN"), ("ended", "EN"), ("up", "EN"), ("being", "EN"), ("pissed", "EN"), ("while", "EN"), ("running", "EN")]
+AXIS1   = >>> neither
+AXIS2   = >>> none
+TARGET  = >>> none
+MECH    = >>> 
+CONF    = >>> certain
+WHY     = >>> frustration towards something not aggression towards anyone
+
+# =====================================================================
+# TURN 5  — the bare "ah" collision (SG particle vs English interjection)
+TEXT = "wait ah I think I know why"
+LANGID  = >>> [("wait", "EN"), ("ah", "SG"), ("I", "EN"), ("think", "EN"), ("I", "EN"), ("know", "EN"), ("why", "EN")]
+AXIS1   = >>> neither
+AXIS2   = >>> none
+TARGET  = >>> none
+MECH    = >>> 
+CONF    = >>> certain
+WHY     = >>> a normal sentence in a conversation, no aggression. in this context ah is a singlish term but can collide with english interjection ah in different context
+
+# =====================================================================
+# TURN 6  — intra-message code-mix: Mandarin + EN + informal-EN
+TEXT = "睡觉time alr"
+LANGID  = >>>   [("睡觉", "ZH"),("time", "EN") ,("alr", "EN")]
+AXIS1   = >>> neither
+AXIS2   = >>> none
+TARGET  = >>> none
+MECH    = >>>
+CONF    = >>> certain
+WHY     = >>> Intra-message code-mix — 睡觉(ZH) + time(EN) + alr(EN-by-rule), three categories in three tokens. Demonstrates code-mixing is inter-token not intra-token
+
+# =====================================================================
+# TURN 7  — high affect, caps + laughter, but NOT aggressive (negative control for Axis2)
+TEXT = "NOT THIS AGAIN HAHAHHAAHHHAAHAHHAHAHAHA"
+LANGID  = >>> [("NOT", "EN"),("THIS", "EN") ,("AGAIN", "EN"), ("HAHAHHAAHHHAAHAHHAHAHAHA", "OTH")]
+AXIS1   = >>> neither
+AXIS2   = >>> none
+TARGET  = >>> none
+MECH    = >>>
+CONF    = >>> certain
+WHY     = >>> a joke being passed between friends, caps lock indicating high emotion but not negative
+
+# =====================================================================
+# TURN 8  — the SPINE example: same string flips on context (your soft-label case)
+TEXT = "you useless"   # imagine: between trust-4 close friends, post-banter
+LANGID  = >>> [("you", "EN"),("useless", "EN")]
+AXIS1   = >>> neither
+AXIS2   = >>> {"mock_aggression": 2, "genuine_aggression": 1} 
+TARGET  = >>> addressee
+MECH    = >>> direct
+CONF    = >>> uncertain (irreducible)
+WHY     = >>> 'you useless' is harsh enough that reasonable annotators split mock vs genuine — irreducible disagreement. instead of forcing majority, the label IS the distribution {mock:2, genuine:1}, forcing a hard label here manufactures a false positive (or false negative); the distribution is the honest, trainable target."

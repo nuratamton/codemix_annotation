@@ -1,12 +1,3 @@
-"""Scenario B — local open-source annotation (Ollama).
-
-Like Scenario A, this file is only a backend adapter and a CLI. It now runs the
-same two single-task calls (langid, then harm) as A via the shared flow, so the
-local-vs-API comparison isolates the model. Previously B used one joint prompt;
-that conflated backend with prompt design and let a mangled tag array corrupt the
-harm output. Splitting fixes both.
-"""
-
 import argparse
 import json
 import urllib.error
@@ -19,7 +10,6 @@ OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
 
 
 def make_call(model=MODEL, url=OLLAMA_URL, timeout=180):
-    """Return a call_fn(system, user) -> raw JSON text backed by local Ollama."""
 
     def call(system, user):
         payload = {
