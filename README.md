@@ -87,5 +87,8 @@ so failed alignments or invalid labels remain auditable.
 
 ## Notebook
 
-Open `notebooks/eda.ipynb`. Paths inside the notebook are relative to the
-notebook folder, so the dataset is read from `../data/codemix_nura_task.csv`.
+Open `notebooks/eda.ipynb`. Paths inside the notebook are relative to the notebook folder, so the dataset is read from `../data/codemix_nura_task.csv`.
+
+## AI Usage
+
+AI assistance was used during this project to improve sentence clarity in the written reports, help examine annotation outputs and edge cases, and provide guidance while implementing and checking the coding tasks. The annotation schemes, final decisions, output review, and submitted files were all checked and verified before submission.
