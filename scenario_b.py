@@ -54,6 +54,11 @@ def parse_args():
     parser.add_argument("--max-tokens", type=int, default=18)
     parser.add_argument("--sample-offset", type=int, default=0)
     parser.add_argument("--timeout", type=int, default=180)
+    parser.add_argument(
+        "--disclosure",
+        action="store_true",
+        help="run the optional disclosure annotation",
+    )
     return parser.parse_args()
 
 
@@ -68,5 +73,6 @@ if __name__ == "__main__":
         context_window=args.context_window,
         max_tokens=args.max_tokens,
         sample_offset=args.sample_offset,
+        include_disclosure=args.disclosure,
     )
     print(f"Saved {written} annotations to {output}")

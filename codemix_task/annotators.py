@@ -5,6 +5,9 @@ from pathlib import Path
 from codemix_task.common import (
     AGGRESSION,
     CONFIDENCE,
+    DISCLOSURE_DEPTHS,
+    DISCLOSURE_SUBJECTS,
+    DISCLOSURE_TYPES,
     HARM_TYPES,
     LANG_TAGS,
     TARGETS,
@@ -107,6 +110,64 @@ def harm_user(target_message, context_turns, relationship):
         f'TARGET message to annotate:\n"{target_message}"'
     )
 
+DISCLOSURE_SYSTEM = """You are a self-disclosure annotator for Singaporean code-mixed chat.
+Judge whether a TARGET message voluntarily reveals personal information — facts,
+feelings, or thoughts — that the listener could not otherwise know.
+
+disclosure_type (if several apply, label the DEEPEST one and mention the rest in note):
+- "informational": facts or events from someone's life ("otw home", "i failed my mods",
+   "my mum found out").
+- "emotional": feelings or inner states, however casual. Bare mood venting COUNTS
+   ("so sian", "im so stressed") — a feeling is disclosed even in three tokens.
+- "cognitive": personal opinions, evaluations, beliefs ("i think the module is useless",
+   "ngl i dont trust him").
+- "none": nothing personal is revealed — questions, logistics, reactions ("ok", "HAHAHA",
+   "what time u reaching"), talk purely about impersonal topics.
+
+depth (sensitivity of WHAT is revealed, not how strongly it is worded):
+- "low": routine daily life — location, meals, plans, passing moods.
+- "medium": personal but not sensitive — preferences, mild personal history, everyday worries.
+- "high": sensitive territory — health, family or relationship conflict, fears, secrets,
+   money, failure. A secret stays "high" even when told casually.
+- "none": only when disclosure_type is "none".
+
+subject: whose private information is revealed.
+- "self": the speaker's own.
+- "other": a third party's ("she told me she's failing but dont tell anyone" — the speaker
+   is passing on someone ELSE's disclosure).
+- "none": only when disclosure_type is "none".
+
+RULES:
+- Disclosure is about content revealed, not tone. An angry message discloses nothing unless
+  it reveals a fact, feeling, or belief about a person.
+- Casual wording does not reduce depth: "lol my parents might divorce" is high.
+- A question does not disclose; it elicits. Answering one still counts as disclosure.
+- confidence: "certain" or "uncertain". note: short reason if uncertain or if multiple
+  types were present, else "".
+
+EXAMPLES:
+- "otw home now"
+    -> {"disclosure_type":"informational","depth":"low","subject":"self","confidence":"certain","note":""}
+- "WAH DAMN SIAN"
+    -> {"disclosure_type":"emotional","depth":"low","subject":"self","confidence":"certain","note":""}
+- "she told me she might drop out, dont tell anyone ah"
+    -> {"disclosure_type":"informational","depth":"high","subject":"other","confidence":"certain","note":""}
+- "what time u reaching"
+    -> {"disclosure_type":"none","depth":"none","subject":"none","confidence":"certain","note":""}
+
+Return STRICT JSON:
+{"disclosure_type":"...","depth":"...","subject":"...","confidence":"...","note":"..."}"""
+
+
+def disclosure_user(target_message, context_turns, relationship):
+    ctx = "\n".join(f"- {t}" for t in context_turns) if context_turns else "(none)"
+    return (
+        f"Relationship between speakers: {relationship}\n\n"
+        f"Preceding conversation turns:\n{ctx}\n\n"
+        f'TARGET message to annotate:\n"{target_message}"'
+    )
+
+
 def parse_json(text):
     try:
         return json.loads(text)
@@ -117,6 +178,7 @@ def parse_json(text):
         return json.loads(match.group(0))
 
 
+# validation
 def validate_langid(tags, tokens):
     issues = []
     if len(tags) != len(tokens):
@@ -144,10 +206,6 @@ def validate_harm(harm):
         and harm.get("target") != "none"
     ):
         issues.append("target should be 'none' when harm_type=neither and aggression=none")
-    # Mirror rule: an aggressive ACT is directed at someone, so a present
-    # aggression_function must carry a non-none target. Catches the qwen slip
-    # of mock_aggression paired with target=none. Restricted to the two valid
-    # aggressive values so it never fires on missing/invalid aggression output.
     if (
         harm.get("aggression_function") in {"genuine_aggression", "mock_aggression"}
         and harm.get("target") == "none"
@@ -156,7 +214,28 @@ def validate_harm(harm):
     harm["issues"] = issues
     return harm
 
-def annotate_item(item, call_fn, model, keep_raw=True):
+
+def validate_disclosure(disclosure):
+    issues = []
+    if disclosure.get("disclosure_type") not in DISCLOSURE_TYPES:
+        issues.append(f"invalid disclosure_type: {disclosure.get('disclosure_type')}")
+    if disclosure.get("depth") not in DISCLOSURE_DEPTHS:
+        issues.append(f"invalid depth: {disclosure.get('depth')}")
+    if disclosure.get("subject") not in DISCLOSURE_SUBJECTS:
+        issues.append(f"invalid subject: {disclosure.get('subject')}")
+    if disclosure.get("confidence") not in CONFIDENCE:
+        issues.append(f"invalid confidence: {disclosure.get('confidence')}")
+    if disclosure.get("disclosure_type") == "none":
+        if disclosure.get("depth") != "none" or disclosure.get("subject") != "none":
+            issues.append("depth and subject should be 'none' when disclosure_type=none")
+    elif disclosure.get("disclosure_type") in DISCLOSURE_TYPES:
+        if disclosure.get("depth") == "none" or disclosure.get("subject") == "none":
+            issues.append("depth and subject should be set when a disclosure is present")
+    disclosure["issues"] = issues
+    return disclosure
+
+
+def annotate_item(item, call_fn, model, keep_raw=True, include_disclosure=False):
     message = item["message"]
     tokens = tokenize(message)
 
@@ -173,7 +252,19 @@ def annotate_item(item, call_fn, model, keep_raw=True):
         langid["raw"] = langid_raw
         harm["raw"] = harm_raw
 
-    return {**item, "model": model, "langid": langid, "harm": harm}
+    record = {**item, "model": model, "langid": langid, "harm": harm}
+
+    if include_disclosure:
+        disclosure_raw = call_fn(
+            DISCLOSURE_SYSTEM,
+            disclosure_user(message, item["context_turns"], item["relationship_type"]),
+        )
+        disclosure = validate_disclosure(parse_json(disclosure_raw))
+        if keep_raw:
+            disclosure["raw"] = disclosure_raw
+        record["disclosure"] = disclosure
+
+    return record
 
 
 def run_samples(
@@ -186,6 +277,7 @@ def run_samples(
     max_tokens,
     sample_offset=0,
     keep_raw=True,
+    include_disclosure=False,
 ):
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -200,7 +292,11 @@ def run_samples(
     ))
     with output.open("w", encoding="utf-8") as f:
         for index, item in enumerate(items, 1):
-            record = annotate_item(item, call_fn, model, keep_raw=keep_raw)
+            record = annotate_item(
+                item, call_fn, model,
+                keep_raw=keep_raw,
+                include_disclosure=include_disclosure,
+            )
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
             print(f"Annotated {index}/{len(items)}: {item['message'][:80]}")
 

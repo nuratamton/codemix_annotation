@@ -15,7 +15,6 @@ MODEL = "gpt-4o-mini"
 
 
 def make_call(model=MODEL):
-    """Return a call_fn(system, user) -> raw JSON text backed by the OpenAI API."""
     if not os.environ.get("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY is not set")
     from openai import OpenAI
@@ -48,6 +47,11 @@ def parse_args():
     parser.add_argument("--context-window", type=int, default=3)
     parser.add_argument("--max-tokens", type=int, default=18)
     parser.add_argument("--sample-offset", type=int, default=0)
+    parser.add_argument(
+        "--disclosure",
+        action="store_true",
+        help="run the optional disclosure annotation",
+    )
     return parser.parse_args()
 
 
@@ -62,5 +66,6 @@ if __name__ == "__main__":
         context_window=args.context_window,
         max_tokens=args.max_tokens,
         sample_offset=args.sample_offset,
+        include_disclosure=args.disclosure,
     )
     print(f"Saved {written} annotations to {output}")

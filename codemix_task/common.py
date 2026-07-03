@@ -8,6 +8,9 @@ HARM_TYPES = {"hate_speech", "offensive", "neither"}
 AGGRESSION = {"genuine_aggression", "mock_aggression", "none"}
 TARGETS = {"self", "addressee", "third_party", "group", "none"}
 CONFIDENCE = {"certain", "uncertain"}
+DISCLOSURE_TYPES = {"informational", "emotional", "cognitive", "none"}
+DISCLOSURE_DEPTHS = {"low", "medium", "high", "none"}
+DISCLOSURE_SUBJECTS = {"self", "other", "none"}
 
 SG_TERMS = {
     "lah", "leh", "lor", "meh", "sia", "hor", "bah", "mah", "liao", "aiya",
