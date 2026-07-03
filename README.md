@@ -52,7 +52,7 @@ continue through the ranked list without overwriting earlier samples.
 source .venv/bin/activate
 python scenario_a.py \
   --csv data/codemix_nura_task.csv \
-  --out outputs/scenario_a/gpt_4o_mini_samples.jsonl \
+  --out outputs/scenario_a/gpt_4o_mini_report_samples.jsonl \
   --limit 10
 ```
 
@@ -64,7 +64,7 @@ Set `OPENAI_API_KEY` in `.env` or in your shell before running real annotations.
 source .venv/bin/activate
 python scenario_b.py \
   --csv data/codemix_nura_task.csv \
-  --out outputs/scenario_b/qwen2_5_3b_samples.jsonl \
+  --out outputs/scenario_b/qwen2_5_3b_report_samples.jsonl \
   --limit 10
 ```
 
@@ -80,6 +80,11 @@ python scenario_b.py --disclosure --out outputs/scenario_b/qwen2_5_3b_disclosure
 
 ## Outputs
 
+The final Scenario A and Scenario B outputs are:
+
+- `outputs/scenario_a/gpt_4o_mini_report_samples.jsonl`
+- `outputs/scenario_b/qwen2_5_3b_report_samples.jsonl`
+
 The JSONL files include the source turn, context turns, model name, language-ID
 labels, harm labels, validator issues, and raw model responses. Validator
 issues are preserved in the output instead of silently correcting model output,
@@ -87,8 +92,9 @@ so failed alignments or invalid labels remain auditable.
 
 ## Notebook
 
-Open `notebooks/eda.ipynb`. Paths inside the notebook are relative to the notebook folder, so the dataset is read from `../data/codemix_nura_task.csv`.
+Open `notebooks/eda.ipynb`. Paths inside the notebook are relative to the
+notebook folder, so the dataset is read from `../data/codemix_nura_task.csv`.
 
 ## AI Usage
 
-AI assistance was used during this project to improve sentence clarity in the written reports, help examine annotation outputs and edge cases, and provide guidance while implementing and checking the coding tasks. The annotation schemes, final decisions, output review, and submitted files were all checked and verified before submission.
+AI assistance was used during this project to improve sentence clarity in the written reports, help examine annotation outputs and edge cases, and provide guidance while implementing and checking the coding tasks. The prompts used were also generated with AI. The annotation schemes, final decisions, output review, and submitted files were all checked and verified before submission.

@@ -80,7 +80,7 @@ GOLD ANNOTATION SAMPLE — template: hand done
     TARGET  = >>> addressee
     CONF    = >>> uncertain (irreducible)
     WHY     = >>> 'you useless' is a direct personal insult → Axis1 offensive 
-    (no profanity needed). On Axis2 it is harsh enough that annotators split mock 
-    vs genuine an irreducible disagreement, so  instead of forcing a majority 
-    the label is the distribution {mock:2, genuine:1}.  Forcing a hard label here would
-    manufacture a false positive (or false negative);.
+    (no profanity needed). On Axis2 it is harsh enough that annotators can have 
+    a disagreement between genuine n mock so  instead of forcing a majority 
+    the label is the distribution {mock:2, genuine:1}.  Forcing a hard label 
+    here would manufacture a false positive (or false negative).
