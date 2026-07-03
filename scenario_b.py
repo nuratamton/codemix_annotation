@@ -49,7 +49,7 @@ def parse_args():
     parser.add_argument("--csv", default="data/codemix_nura_task.csv")
     parser.add_argument("--out", default="outputs/scenario_b/qwen2_5_3b_samples.jsonl")
     parser.add_argument("--model", default=MODEL)
-    parser.add_argument("--limit", type=int, default=8)
+    parser.add_argument("--limit", type=int, default=10) #ran a few w 8 default by mistake
     parser.add_argument("--context-window", type=int, default=3)
     parser.add_argument("--max-tokens", type=int, default=18)
     parser.add_argument("--sample-offset", type=int, default=0)
